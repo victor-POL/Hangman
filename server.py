@@ -32,16 +32,16 @@ def play_game(client_socket, word):
                     hidden_word[i] = guess
 
             if set(hidden_word) == word_set:
-                client_socket.send("You win! The word was: " + word).encode()
+                client_socket.send(("You win! The word was: " + word).encode())
                 break
             else:
-                client_socket.send("".join(hidden_word).encode())
+                client_socket.send(("".join(hidden_word)).encode())
         else:
             attempts += 1
             client_socket.send(f"Wrong guess ({attempts}/{max_attempts} attempts left).".encode())
 
     if attempts >= max_attempts:
-        client_socket.send("You lose! The word was: " + word).encode()
+        client_socket.send(("You lose! The word was: " + word).encode())
 
     client_socket.close()
 
