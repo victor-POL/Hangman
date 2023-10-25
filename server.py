@@ -2,17 +2,18 @@ import socket
 import threading
 import signal
 import sys
+import random
 
 host = "127.0.0.1"
 port = 12345
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((host, port))
-server_socket.listen(2)
+server_socket.listen()
 
 words = ["python", "programming", "hangman", "socket", "threading"]
 
-def play_game(client_socket, word):
+def play_game(client_socket, word, player_id):
     max_attempts = 6
     attempts = 0
     guessed_letters = set()
@@ -45,7 +46,7 @@ def play_game(client_socket, word):
     except ConnectionError:
         pass
     finally:
-        print("User disconnected")
+        print("Player " + str(player_id) + " disconnected")
         client_socket.close()
 
 def signal_handler(sig, frame):
@@ -61,11 +62,12 @@ def main():
     while True:
         client_socket, client_address = server_socket.accept()
         player_num += 1
-        word = words[player_num - 1] if player_num <= len(words) else "default"
+        word = words[random.randint(0, len(words)-1)]
 
         if player_num <= 2:
+            print("Player " + str(player_num) + " connected")
             client_socket.send("Welcome to Hangman! Guess a letter.".encode())
-            game_thread = threading.Thread(target=play_game, args=(client_socket, word))
+            game_thread = threading.Thread(target=play_game, args=(client_socket, word, player_num))
             game_thread.start()
         else:
             client_socket.send("Sorry, the game is full. Try again later.".encode())
