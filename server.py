@@ -1,5 +1,7 @@
 import socket
 import threading
+import signal
+import sys
 
 host = "127.0.0.1"
 port = 12345
@@ -45,7 +47,13 @@ def play_game(client_socket, word):
 
     client_socket.close()
 
+def signal_handler(sig, frame):
+    print('Close server')
+    server_socket.close()
+    sys.exit(0)
+
 def main():
+    signal.signal(signal.SIGINT, signal_handler)
     print("Server listening on {}:{}".format(host, port))
     player_num = 0
 

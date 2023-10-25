@@ -3,8 +3,18 @@ import socket
 host = "127.0.0.1"
 port = 12345 
 
+import signal
+import sys
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+def signal_handler(sig, frame):
+    print('Close client')
+    client_socket.close()
+    sys.exit(0)
+
 def main():
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    signal.signal(signal.SIGINT, signal_handler)
 
     client_socket.connect((host, port))
 
