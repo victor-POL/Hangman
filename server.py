@@ -11,7 +11,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((host, port))
 server_socket.listen()
 
-words = ["python", "programming", "hangman", "socket", "threading"]
+words = ["python"]
 
 def play_game(client_socket, word, player_id):
     max_attempts = 6
@@ -64,14 +64,9 @@ def main():
         player_num += 1
         word = words[random.randint(0, len(words)-1)]
 
-        if player_num <= 2:
-            print("Player " + str(player_num) + " connected")
-            client_socket.send("Welcome to Hangman! Guess a letter.".encode())
-            game_thread = threading.Thread(target=play_game, args=(client_socket, word, player_num))
-            game_thread.start()
-        else:
-            client_socket.send("Sorry, the game is full. Try again later.".encode())
-            client_socket.close()
+        print("Player " + str(player_num) + " connected")
+        game_thread = threading.Thread(target=play_game, args=(client_socket, word, player_num))
+        game_thread.start()
 
 if __name__ == "__main__":
     main()
