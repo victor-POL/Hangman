@@ -19,33 +19,34 @@ def play_game(client_socket, word):
     word_set = set(word)
     hidden_word = ["_" if letter.isalpha() else letter for letter in word]
 
-    while attempts < max_attempts:
-        guess = client_socket.recv(1024).decode().lower()
+    try:
+        while attempts < max_attempts:
+            guess = client_socket.recv(1024).decode().lower()
 
-        if len(guess) != 1 or not guess.isalpha() or guess in guessed_letters:
-            client_socket.send("Invalid guess. Try again.".encode())
-            continue
+            if len(guess) != 1 or not guess.isalpha() or guess in guessed_letters:
+                client_socket.send("Invalid guess. Try again.".encode())
+                continue
 
-        guessed_letters.add(guess)
+            guessed_letters.add(guess)
 
-        if guess in word_set:
-            for i, letter in enumerate(word):
-                if letter == guess:
-                    hidden_word[i] = guess
+            if guess in word_set:
+                for i, letter in enumerate(word):
+                    if letter == guess:
+                        hidden_word[i] = guess
 
-            if set(hidden_word) == word_set:
-                client_socket.send(("You win! The word was: " + word).encode())
-                break
+                if set(hidden_word) == word_set:
+                    client_socket.send(("You win! The word was: " + word).encode())
+                    break
+                else:
+                    client_socket.send(("".join(hidden_word)).encode())
             else:
-                client_socket.send(("".join(hidden_word)).encode())
-        else:
-            attempts += 1
-            client_socket.send(f"Wrong guess ({attempts}/{max_attempts} attempts left).".encode())
-
-    if attempts >= max_attempts:
-        client_socket.send(("You lose! The word was: " + word).encode())
-
-    client_socket.close()
+                attempts += 1
+                client_socket.send(f"Wrong guess ({attempts}/{max_attempts} attempts left).".encode())
+    except ConnectionError:
+        pass
+    finally:
+        print("User disconnected")
+        client_socket.close()
 
 def signal_handler(sig, frame):
     print('Close server')
