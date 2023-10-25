@@ -8,16 +8,13 @@ def main():
 
     client_socket.connect((host, port))
 
-    print("Welcome to Hangman! Guess a letter.")
-
     while True:
+        response = client_socket.recv(1024).decode()
+        print(response)
+
         guess = input("Your guess: ").lower()
 
         client_socket.send(guess.encode())
-
-        response = client_socket.recv(1024).decode()
-
-        print(response)
 
         if "win" in response or "lose" in response:
             break
