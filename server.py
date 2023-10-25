@@ -42,7 +42,7 @@ def play_game(client_socket, word, player_id):
                     client_socket.send(("".join(hidden_word)).encode())
             else:
                 attempts += 1
-                client_socket.send(f"Wrong guess ({attempts}/{max_attempts} attempts left).".encode())
+                client_socket.send(f"Wrong guess ({max_attempts - attempts} attempts left).".encode())
     except ConnectionError:
         pass
     finally:
