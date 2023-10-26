@@ -12,8 +12,11 @@ server_socket.bind((host, port))
 server_socket.listen()
 
 words = ["python"]
+player_count = 0
+player_count_lock = threading.Lock()
 
-def play_game(client_socket, word, player_id):
+def play_game(client_socket, word):
+    global player_count
     max_attempts = 6
     attempts = 0
     guessed_letters = set()
@@ -51,7 +54,10 @@ def play_game(client_socket, word, player_id):
     except ConnectionError:
         pass
     finally:
-        print("Player " + str(player_id) + " disconnected")
+        print("Client disconnected")
+        with player_count_lock:
+            player_count -= 1
+            print("Current player count: {}".format(player_count))
         client_socket.close()
 
 def signal_handler(sig, frame):
@@ -60,17 +66,17 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def main():
+    global player_count
     signal.signal(signal.SIGINT, signal_handler)
     print("Server listening on {}:{}".format(host, port))
-    player_num = 0
 
     while True:
         client_socket, client_address = server_socket.accept()
-        player_num += 1
         word = words[random.randint(0, len(words)-1)]
 
-        print("Player " + str(player_num) + " connected")
-        game_thread = threading.Thread(target=play_game, args=(client_socket, word, player_num))
+        player_count += 1
+        print("Current player count: {}".format(player_count))
+        game_thread = threading.Thread(target=play_game, args=(client_socket, word))
         game_thread.start()
 
 if __name__ == "__main__":
