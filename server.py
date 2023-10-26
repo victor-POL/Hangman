@@ -30,6 +30,7 @@ def play_game(client_socket, word):
 
             if len(guess) != 1 or not guess.isalpha() or guess in guessed_letters:
                 response = "Invalid guess. Try again."
+                client_socket.send(response.encode())
                 continue
 
             guessed_letters.add(guess)
