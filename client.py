@@ -31,11 +31,16 @@ def main(stdscr):
 
         response = client_socket.recv(1024).decode()
 
-        stdscr.move(2, 0)
-        stdscr.clrtoeol()
-        stdscr.addstr(response)
-        stdscr.move(1, len("Input letter: "))
-        stdscr.refresh()
+        if "Invalid" in response or "Wrong" in response:
+            stdscr.move(3, 0)
+            stdscr.clrtoeol()
+            stdscr.addstr(response)
+            stdscr.refresh()
+        else:
+            stdscr.move(2, 0)
+            stdscr.clrtoeol()
+            stdscr.addstr(response)
+            stdscr.refresh()
 
 
         if "win" in response or "lose" in response:
