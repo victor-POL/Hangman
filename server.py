@@ -46,7 +46,7 @@ def play_game(client_socket, word):
                     response = "".join(hidden_word)
             else:
                 attempts += 1
-                response = "Wrong guess (" + str(max_attempts - attempts) + " attempts left)."
+                response = "Wrong guess (" + str(max_attempts - attempts) + " attempts left)." if attempts < max_attempts else ""
             client_socket.send(response.encode())
 
         if attempts == max_attempts:
