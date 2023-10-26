@@ -23,9 +23,10 @@ def play_game(client_socket, word, player_id):
     try:
         while attempts < max_attempts:
             guess = client_socket.recv(1024).decode().lower()
+            response = ""
 
             if len(guess) != 1 or not guess.isalpha() or guess in guessed_letters:
-                client_socket.send("Invalid guess. Try again.".encode())
+                response = "Invalid guess. Try again."
                 continue
 
             guessed_letters.add(guess)
@@ -36,13 +37,17 @@ def play_game(client_socket, word, player_id):
                         hidden_word[i] = guess
 
                 if set(hidden_word) == word_set:
-                    client_socket.send(("You win! The word was: " + word).encode())
+                    client_socket.send(("You win ! The word was: " + word).encode())
                     break
                 else:
-                    client_socket.send(("".join(hidden_word)).encode())
+                    response = "".join(hidden_word)
             else:
                 attempts += 1
-                client_socket.send(f"Wrong guess ({attempts}/{max_attempts} attempts left).".encode())
+                response = "Wrong guess (" + str(max_attempts - attempts) + " attempts left)."
+            client_socket.send(response.encode())
+
+        if attempts == max_attempts:
+            client_socket.send(("You lose ! The word was: " + word).encode())
     except ConnectionError:
         pass
     finally:
@@ -70,3 +75,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

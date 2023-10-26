@@ -43,10 +43,28 @@ def main(stdscr):
             stdscr.refresh()
 
 
-        if "win" in response or "lose" in response:
+        if "lose" in response:
+            stdscr.move(0, 0)
+            stdscr.clrtobot()
+            stdscr.addstr(response)
+            stdscr.move(1, 0)
+            stdscr.addstr("Press any key to exit.")
+            stdscr.refresh()
+            stdscr.getch()
+            break
+
+        if "win" in response:
+            stdscr.move(0, 0)
+            stdscr.clrtobot()
+            stdscr.addstr("Congratulations! You won!")
+            stdscr.move(1, 0)
+            stdscr.addstr("Press any key to exit.")
+            stdscr.refresh()
+            stdscr.getch()
             break
 
     client_socket.close()
 
 if __name__ == "__main__":
     wrapper(main)
+
