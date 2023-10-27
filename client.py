@@ -41,7 +41,7 @@ def main(stdscr):
     stdscr.addstr(1, 0, "Input letter: ")
     stdscr.refresh()
 
-    attempts = 1  # Inicializado a 1
+    attempts = 1
     while True:
         guess = chr(stdscr.getch()).lower()
 
@@ -50,12 +50,13 @@ def main(stdscr):
         response = client_socket.recv(1024).decode()
 
         if "Invalid" in response or "Wrong" in response:
-            draw_stick_man(stdscr, attempts)
+            if "Wrong" in response: 
+                draw_stick_man(stdscr, attempts)
+                attempts += 1
             stdscr.move(3, 0)
             stdscr.clrtoeol()
             stdscr.addstr(response)
             stdscr.refresh()
-            attempts += 1
         else:
             stdscr.move(2, 0)
             stdscr.clrtoeol()
