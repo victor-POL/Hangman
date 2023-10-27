@@ -17,7 +17,7 @@ player_count_lock = threading.Lock()
 
 def play_game(client_socket, word):
     global player_count
-    max_attempts = 6
+    max_attempts = 9
     attempts = 0
     guessed_letters = set()
     word_set = set(word)
