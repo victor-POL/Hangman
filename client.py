@@ -50,10 +50,15 @@ def process_response(stdscr, attempts, response):
     if "Invalid" in response:
         display_message(stdscr, 3, response)
     elif "Wrong" in response:
+        attempts += 1
         draw_stick_man(stdscr, attempts)
         display_message(stdscr, 3, response)
+    elif "lose" in response or "win" in response:
+        display_exit_message(stdscr, response)
+        attempts = -1
     else:
         display_message(stdscr, 2, response)
+    return attempts
 
 
 def display_exit_message(stdscr, response):
@@ -64,6 +69,12 @@ def display_exit_message(stdscr, response):
     stdscr.refresh()
     stdscr.getch()
 
+def get_input_letter(stdscr):
+    stdscr.move(1, 14)
+    guess = chr(stdscr.getch()).lower()
+    stdscr.addch(guess)
+    stdscr.refresh()
+    return guess
 
 def main(stdscr):
     signal.signal(signal.SIGINT, signal_handler)
@@ -75,18 +86,13 @@ def main(stdscr):
     stdscr.refresh()
 
     attempts = 0
-    while True:
-        guess = chr(stdscr.getch()).lower()
+    while attempts != -1:
+        guess = get_input_letter(stdscr)
 
         client_socket.send(guess.encode())
 
         response = client_socket.recv(1024).decode()
-        process_response(stdscr, attempts, response)
-        attempts += 1
-
-        if "lose" in response or "win" in response:
-            display_exit_message(stdscr, response)
-            break
+        attempts = process_response(stdscr, attempts, response)
 
     client_socket.close()
 
