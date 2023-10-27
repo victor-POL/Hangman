@@ -15,6 +15,7 @@ words = ["python"]
 player_count = 0
 player_count_lock = threading.Lock()
 
+
 def play_game(client_socket, word):
     global player_count
     max_attempts = 9
@@ -41,13 +42,15 @@ def play_game(client_socket, word):
                         hidden_word[i] = guess
 
                 if set(hidden_word) == word_set:
-                    client_socket.send(("You win ! The word was: " + word).encode())
+                    client_socket.send(
+                        ("You win ! The word was: " + word).encode())
                     break
                 else:
                     response = "".join(hidden_word)
             else:
                 attempts += 1
-                response = "Wrong guess (" + str(max_attempts - attempts) + " attempts left)." if attempts < max_attempts else ""
+                response = "Wrong guess (" + str(max_attempts - attempts) + \
+                    " attempts left)." if attempts < max_attempts else ""
             client_socket.send(response.encode())
 
         if attempts == max_attempts:
@@ -61,10 +64,12 @@ def play_game(client_socket, word):
             print("Current player count: {}".format(player_count))
         client_socket.close()
 
+
 def signal_handler(sig, frame):
     print('Close server')
     server_socket.close()
     sys.exit(0)
+
 
 def main():
     global player_count
@@ -77,9 +82,10 @@ def main():
 
         player_count += 1
         print("Current player count: {}".format(player_count))
-        game_thread = threading.Thread(target=play_game, args=(client_socket, word))
+        game_thread = threading.Thread(
+            target=play_game, args=(client_socket, word))
         game_thread.start()
+
 
 if __name__ == "__main__":
     main()
-

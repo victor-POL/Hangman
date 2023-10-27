@@ -21,15 +21,49 @@ stick_man_parts = [
     (9, 3, "\\"),
 ]
 
+
 def signal_handler(sig, frame):
     print('Close client')
     client_socket.close()
     sys.exit(0)
 
+
 def draw_stick_man(stdscr, attempts):
     for i in range(attempts):
         y, x, char = stick_man_parts[i]
         stdscr.addstr(y, x, char)
+
+
+def display_message(stdscr, y, message):
+    stdscr.move(y, 0)
+    stdscr.clrtoeol()
+    stdscr.addstr(message)
+    stdscr.refresh()
+
+
+def display_welcome(stdscr):
+    display_message(stdscr, 0, "Welcome to Hangman! Guess a letter.")
+    display_message(stdscr, 1, "Input letter: ")
+
+
+def process_response(stdscr, attempts, response):
+    if "Invalid" in response:
+        display_message(stdscr, 3, response)
+    elif "Wrong" in response:
+        draw_stick_man(stdscr, attempts)
+        display_message(stdscr, 3, response)
+    else:
+        display_message(stdscr, 2, response)
+
+
+def display_exit_message(stdscr, response):
+    stdscr.move(0, 0)
+    stdscr.clrtobot()
+    display_message(stdscr, 0, response)
+    display_message(stdscr, 1, "Press any key to exit.")
+    stdscr.refresh()
+    stdscr.getch()
+
 
 def main(stdscr):
     signal.signal(signal.SIGINT, signal_handler)
@@ -37,43 +71,25 @@ def main(stdscr):
     client_socket.connect((host, port))
 
     stdscr.clear()
-    stdscr.addstr(0, 0, "Welcome to Hangman! Guess a letter.")
-    stdscr.addstr(1, 0, "Input letter: ")
+    display_welcome(stdscr)
     stdscr.refresh()
 
-    attempts = 1
+    attempts = 0
     while True:
         guess = chr(stdscr.getch()).lower()
 
         client_socket.send(guess.encode())
 
         response = client_socket.recv(1024).decode()
-
-        if "Invalid" in response or "Wrong" in response:
-            if "Wrong" in response: 
-                draw_stick_man(stdscr, attempts)
-                attempts += 1
-            stdscr.move(3, 0)
-            stdscr.clrtoeol()
-            stdscr.addstr(response)
-            stdscr.refresh()
-        else:
-            stdscr.move(2, 0)
-            stdscr.clrtoeol()
-            stdscr.addstr(response)
-            stdscr.refresh()
+        process_response(stdscr, attempts, response)
+        attempts += 1
 
         if "lose" in response or "win" in response:
-            stdscr.move(0, 0)
-            stdscr.clrtobot()
-            stdscr.addstr(response)
-            stdscr.move(1, 0)
-            stdscr.addstr("Press any key to exit.")
-            stdscr.refresh()
-            stdscr.getch()
+            display_exit_message(stdscr, response)
             break
 
     client_socket.close()
+
 
 if __name__ == "__main__":
     wrapper(main)
