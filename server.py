@@ -3,6 +3,7 @@ import threading
 import signal
 import sys
 import random
+import time
 
 host = "127.0.0.1"
 port = 12345
@@ -23,10 +24,11 @@ def play_game(client_socket, word):
     guessed_letters = set()
     word_set = set(word)
     hidden_word = ["_" if letter.isalpha() else letter for letter in word]
-
+    start_time = 0
     try:
         while attempts < max_attempts:
             guess = client_socket.recv(1024).decode().lower()
+            start_time = start_timer() if start_time == 0 else start_time
             response = ""
 
             if len(guess) != 1 or not guess.isalpha() or guess in guessed_letters:
@@ -42,8 +44,9 @@ def play_game(client_socket, word):
                         hidden_word[i] = guess
 
                 if set(hidden_word) == word_set:
+                    elapsed_time = end_timer(start_time)
                     client_socket.send(
-                        ("You win ! The word was: " + word).encode())
+                            (f"You win ! The word was: {word} and it took you: {elapsed_time:.2f} seconds").encode())
                     break
                 else:
                     response = "".join(hidden_word)
@@ -54,7 +57,9 @@ def play_game(client_socket, word):
             client_socket.send(response.encode())
 
         if attempts == max_attempts:
-            client_socket.send(("You lose ! The word was: " + word).encode())
+            elapsed_time = end_timer(start_time)
+            client_socket.send(
+                            (f"You lose ! The word was: {word} and it took you: {elapsed_time:.2f} seconds").encode())
     except ConnectionError:
         pass
     finally:
@@ -64,12 +69,16 @@ def play_game(client_socket, word):
             print("Current player count: {}".format(player_count))
         client_socket.close()
 
-
 def signal_handler(sig, frame):
     print('Close server')
     server_socket.close()
     sys.exit(0)
 
+def start_timer():
+    return time.time()
+
+def end_timer(start_time):
+    return time.time() - start_time
 
 def main():
     global player_count
@@ -90,3 +99,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
