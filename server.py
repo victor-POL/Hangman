@@ -77,11 +77,12 @@ def main():
     print("Server listening on {}:{}".format(host, port))
 
     while True:
-        client_socket, client_address = server_socket.accept()
+        client_socket, _ = server_socket.accept()
         word = words[random.randint(0, len(words)-1)]
 
-        player_count += 1
-        print("Current player count: {}".format(player_count))
+        with player_count_lock:
+            player_count += 1
+            print("Current player count: {}".format(player_count))
         game_thread = threading.Thread(
             target=play_game, args=(client_socket, word))
         game_thread.start()
